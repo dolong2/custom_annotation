@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.lang.reflect.Field;
 
 @Component
@@ -25,20 +24,24 @@ public class AnnotationValueInjector implements ApplicationListener<ApplicationS
                 continue;
             if(classPath.contains("$"))
                 classPath = classPath.substring(0,classPath.indexOf("$"));
-            try {
-                Class<?> beanClass = Class.forName(classPath);
-                Field[] fields = beanClass.getDeclaredFields();
-                for(Field field:fields){
-                    Slf4j annotation = field.getDeclaredAnnotation(Slf4j.class);
-                    if(annotation!=null){
-                        field.setAccessible(true);
-                        Logger logger = LoggerFactory.getLogger(classPath);
-                        field.set(bean, logger);
-                    }
+            injectLogger(bean, classPath);
+        }
+    }
+
+    private static void injectLogger(Object bean, String classPath) {
+        try {
+            Class<?> beanClass = Class.forName(classPath);
+            Field[] fields = beanClass.getDeclaredFields();
+            for(Field field:fields){
+                Slf4j annotation = field.getDeclaredAnnotation(Slf4j.class);
+                if(annotation!=null){
+                    field.setAccessible(true);
+                    Logger logger = LoggerFactory.getLogger(classPath);
+                    field.set(bean, logger);
                 }
-            } catch (ClassNotFoundException | IllegalAccessException e) {
-                throw new RuntimeException(e);
             }
+        } catch (ClassNotFoundException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 }
