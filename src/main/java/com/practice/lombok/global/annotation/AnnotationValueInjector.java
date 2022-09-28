@@ -28,7 +28,7 @@ public class AnnotationValueInjector implements ApplicationListener<ApplicationS
         }
     }
 
-    private static void injectLogger(Object bean, String classPath) {
+    private void injectLogger(Object bean, String classPath) {
         try {
             Class<?> beanClass = Class.forName(classPath);
             Field[] fields = beanClass.getDeclaredFields();
